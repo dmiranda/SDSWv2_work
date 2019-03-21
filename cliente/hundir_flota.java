@@ -5,10 +5,10 @@ import javax.swing.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
-public class hundir_flota_v6 extends UnicastRemoteObject implements hundir_flota_v6_interface {
+public class hundir_flota extends UnicastRemoteObject implements hundir_flota_interface {
 		
 	//CONTRINCANTE
-	hundir_flota_v6_interface enemigo = null;
+	hundir_flota_interface enemigo = null;
 	private boolean contricante_listo = false;
 
 	//Variables globales
@@ -25,6 +25,7 @@ public class hundir_flota_v6 extends UnicastRemoteObject implements hundir_flota
 	private JButton c1,c2,c3,c4;
 	private JButton comenzar, salir, instrucciones;
 	private Frame ventana;
+	private Frame ventana_espera;
 	private int barco_seleccionado=0;
 	
 	//Clases que gestionan los botones
@@ -156,8 +157,17 @@ public class hundir_flota_v6 extends UnicastRemoteObject implements hundir_flota
 	}
 	
 	//Crea la ventana y llama al constructor de la interfaz grafica
-	public hundir_flota_v6() throws RemoteException{
+	public hundir_flota() throws RemoteException{
+		ventana_espera = new Frame("Esperando a jugador");
+		ventana_espera.setSize(100,100);
+		Label mensajito = new Label("Espere.....");
+		
+		ventana_espera.setVisible(true);
+	}
 			
+		
+	public void iniciar_juego (){
+		
 		ventana = new Frame("Hundir la flota");
 		
 		ventana.addWindowListener(new WindowListener(){
@@ -256,8 +266,10 @@ public class hundir_flota_v6 extends UnicastRemoteObject implements hundir_flota
 		//ADEMAS TENDRÍA QUE ELIMINAR LA CONEXIÓN CON EL OTRO JUGADOR
 	}
 	
-	public void empieza_partida(hundir_flota_v6_interface contrincante) throws RemoteException{
+	public void empieza_partida(hundir_flota_interface contrincante) throws RemoteException{
 		enemigo = contrincante;
+		ventana_espera.setVisible(false);
+		iniciar_juego();
 	}
 	
 	//Gestiona las pulsaciones sobre el mapa de la izquierda, es decir, el mapa del contrincante

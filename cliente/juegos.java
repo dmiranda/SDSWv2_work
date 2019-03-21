@@ -5,13 +5,14 @@ import javax.swing.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
-class juegos_v2 extends JFrame implements ActionListener{
+class juegos extends JFrame implements ActionListener{
 
 	private JButton b[] = new JButton[2];
 	ServicioJuego srv;
 	String servidor, puerto;
+	hundir_flota user;
 	
-	juegos_v2(String server,String port){
+	juegos(String server,String port){
 		super("Centro de actividades by davmirrom");
 
 		b[0]=new JButton("Jugar al hundir la flota");
@@ -38,9 +39,9 @@ class juegos_v2 extends JFrame implements ActionListener{
 			try{
 				srv = (ServicioJuego) Naming.lookup("//" + servidor + ":" + puerto + "/Juegos");
 				System.out.println("Conectado");
-				hundir_flota_v6 juego1= new hundir_flota_v6();
+				user = new hundir_flota();
 				System.out.println("Creado");
-				srv.alta(juego1);
+				srv.alta(user);
 				System.out.println("Alta");
 			}
 			
@@ -53,15 +54,19 @@ class juegos_v2 extends JFrame implements ActionListener{
 		
 		else
 		{
-			//srv.baja(j);
-            System.exit(0);
+			try{
+				srv.baja(user);
+				System.exit(0);
+			}
+			
+			catch (Exception ra){}
 		}
 	}
 	/************************************************************/
 
 	public static void main(String[] args){
 		if (args.length!=2) {
-            System.err.println("Uso: juegos_v2 hostregistro numPuertoRegistro");
+            System.err.println("Uso: juegos hostregistro numPuertoRegistro");
             return;
         }
 
@@ -69,7 +74,7 @@ class juegos_v2 extends JFrame implements ActionListener{
             System.setSecurityManager(new SecurityManager());
 
         try {
-			new juegos_v2(args[0],args[1]);
+			new juegos(args[0],args[1]);
         }
         catch (Exception e) {
             System.err.println("Excepcion en ClienteChat:");

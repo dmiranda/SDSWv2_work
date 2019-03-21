@@ -3,10 +3,10 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 class ServicioJuegoImpl extends UnicastRemoteObject implements ServicioJuego {
-    hundir_flota_v6_interface jugador_espera = null;
+    hundir_flota_interface jugador_espera = null;
     ServicioJuegoImpl() throws RemoteException {
     }
-    public void alta(hundir_flota_v6_interface c) throws RemoteException {
+    public void alta(hundir_flota_interface c) throws RemoteException {
 		System.out.println("Nuevo jugador!");
 		if(jugador_espera==null){
 			jugador_espera = c;
@@ -25,7 +25,8 @@ class ServicioJuegoImpl extends UnicastRemoteObject implements ServicioJuego {
 			}
 		}
     }
-    public void baja(hundir_flota_v6_interface c) throws RemoteException {
+    public void baja(hundir_flota_interface c) throws RemoteException {
 		jugador_espera=null;
+		System.out.println("\tJugador salio");
     }
 }
