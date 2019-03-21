@@ -14,8 +14,8 @@ class ServicioJuegoImpl extends UnicastRemoteObject implements ServicioJuego {
 		}
 		else{
 			try{
-				jugador_espera.empieza_partida(c);
-				c.empieza_partida(jugador_espera);				
+				jugador_espera.empieza_partida(c,true);
+				c.empieza_partida(jugador_espera,false);				
 			}
 			catch(RemoteException re){
 				System.out.println("No se ha podido realizar conexion");

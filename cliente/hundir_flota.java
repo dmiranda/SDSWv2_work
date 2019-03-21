@@ -10,6 +10,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	//CONTRINCANTE
 	hundir_flota_interface enemigo = null;
 	private boolean contricante_listo = false;
+	boolean turno = false;
+	
 
 	//Variables globales
 	private int N_botones=100;
@@ -160,7 +162,10 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	public hundir_flota() throws RemoteException{
 		ventana_espera = new Frame("Esperando a jugador");
 		ventana_espera.setSize(100,100);
+
 		Label mensajito = new Label("Espere.....");
+		mensajito.setBounds(10,20,20,20);
+		ventana_espera.add(mensajito);
 		
 		ventana_espera.setVisible(true);
 	}
@@ -239,19 +244,28 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 			}
 		}
 		
-					
+		if(tocado == true)
+			mi_mapa[casilla].setIcon(ic_tocado);
+		else
+			mi_mapa[casilla].setIcon(ic_agua);
+		
 		if(barcos_destruidos[0] && barcos_destruidos[1] && barcos_destruidos[2] && barcos_destruidos[3]){
 			try{
 				enemigo.fin_partida();
+				JOptionPane.showMessageDialog(ventana,"Perdiste la partida :(");				
 			}
 			
 			catch (RemoteException fallo){
 				JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
+			}
+			
+			finally{
 				ventana.dispose();
 			}
 		
 		}
 		
+		turno = true;
 		return tocado;
 	}
 	
@@ -260,14 +274,13 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		System.out.println("Enviada peticion de listo");
 	}
 	
-	public void fin_partida() throws RemoteException{
+	public void fin_partida(){
 		JOptionPane.showMessageDialog(ventana,"¡¡ENHORABUENA, HAS GANADO!!");
-		ventana.dispose();
-		//ADEMAS TENDRÍA QUE ELIMINAR LA CONEXIÓN CON EL OTRO JUGADOR
 	}
 	
-	public void empieza_partida(hundir_flota_interface contrincante) throws RemoteException{
+	public void empieza_partida(hundir_flota_interface contrincante,boolean turn) throws RemoteException{
 		enemigo = contrincante;
+		turno = turn;
 		ventana_espera.setVisible(false);
 		iniciar_juego();
 	}
@@ -276,26 +289,31 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	class PulsaMapaPartida implements ActionListener{
         public void actionPerformed(ActionEvent e){
             JButton boton_pulsado = (JButton)e.getSource();
-			for(int j=0; j<N_botones; j++){
-				if(mi_partida[j]==boton_pulsado){
-					mi_partida[j].removeActionListener(pmp);
-					System.out.println("Boton presionado: " + j);
-					try{
-						if(enemigo.tiro(j))
-							mi_partida[j].setIcon(ic_tocado);
-						else
-							mi_partida[j].setIcon(ic_agua);
-					}
-					catch(RemoteException fail){
-						JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
-						ventana.dispose();
-					}
+			if(turno){
+				for(int j=0; j<N_botones; j++){
+					if(mi_partida[j]==boton_pulsado){
+						mi_partida[j].removeActionListener(pmp);
+						System.out.println("Boton presionado: " + j);
+						try{
+							if(enemigo.tiro(j))
+								mi_partida[j].setIcon(ic_tocado);
+							else
+								mi_partida[j].setIcon(ic_agua);
+						}
+						catch(RemoteException fail){
+							JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
+							ventana.dispose();
+						}
 
-					finally{
-						break;
+						finally{
+							turno = false;
+							break;
+						}
 					}
 				}
 			}
+			else
+				JOptionPane.showMessageDialog(ventana,"No es tu turno!");
 		}
     }
 	
