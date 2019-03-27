@@ -163,14 +163,13 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		ventana_espera = new Frame("Esperando a jugador");
 		ventana_espera.setSize(100,100);
 
-		Label mensajito = new Label("Espere.....");
+		JLabel mensajito = new JLabel("Espere.....");
 		mensajito.setBounds(10,20,20,20);
 		ventana_espera.add(mensajito);
 		
 		ventana_espera.setVisible(true);
 	}
-			
-		
+					
 	public void iniciar_juego (){
 		
 		ventana = new Frame("Hundir la flota");
@@ -281,7 +280,9 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	public void empieza_partida(hundir_flota_interface contrincante,boolean turn) throws RemoteException{
 		enemigo = contrincante;
 		turno = turn;
+		ventana_espera.removeAll();
 		ventana_espera.setVisible(false);
+		ventana_espera = null;
 		iniciar_juego();
 	}
 	
@@ -607,15 +608,26 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				}
 				
 				try{
-					enemigo.listo();
 					while(!contricante_listo){
-						JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
+						//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
+						if(ventana_espera == null){
+							JFrame ventana_espera = new JFrame();
+							ventana_espera.setSize(100,100);
+							JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
+							mensajito.setBounds(100,100,100,100);
+							ventana_espera.add(mensajito);
+							ventana_espera.setVisible(true);
+						}
 						enemigo.listo();
-						System.out.println("Contrincante =" + contricante_listo);
 					}
+					
+					ventana_espera.setVisible(false);
+					ventana_espera = null;
 				}
 				catch(Exception io){
 					JOptionPane.showMessageDialog(ventana,"Algún error a la hora de avisar al compi");
+					ventana_espera.setVisible(false);
+					ventana_espera = null;
 				};
 				
 				Mapa_enemigo();
