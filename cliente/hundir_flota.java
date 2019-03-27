@@ -26,8 +26,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	private Label titulo1,titulo2;
 	private JButton c1,c2,c3,c4;
 	private JButton comenzar, salir, instrucciones;
-	private Frame ventana;
-	private Frame ventana_espera;
+	private Frame ventana,ventana_espera,ventana_espera_1;
+	//private Frame ventana_espera;
 	private int barco_seleccionado=0;
 	
 	//Clases que gestionan los botones
@@ -160,6 +160,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	
 	//Crea la ventana y llama al constructor de la interfaz grafica
 	public hundir_flota() throws RemoteException{
+		
 		ventana_espera = new Frame("Esperando a jugador");
 		ventana_espera.setSize(100,100);
 
@@ -281,10 +282,11 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	public void empieza_partida(hundir_flota_interface contrincante,boolean turn) throws RemoteException{
 		enemigo = contrincante;
 		turno = turn;
-		//ventana_espera.removeAll();
-		//ventana_espera.setVisible(false);
-		//ventana_espera = null;
-		ventana_espera.dispose();
+		
+		ventana_espera.removeAll();
+		ventana_espera.setVisible(false);
+		ventana_espera = null;
+		
 		iniciar_juego();
 	}
 	
@@ -613,18 +615,21 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 					enemigo.listo();
 					
 					//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
-					JFrame ventana_espera = new JFrame();
-					ventana_espera.setSize(100,100);
+					ventana_espera_1 = new Frame("Esperando a contrincante");
+					ventana_espera_1.setSize(100,100);
 					JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
-					mensajito.setBounds(100,100,100,100);
-					ventana_espera.add(mensajito);
-					ventana_espera.setVisible(true);
+					mensajito.setBounds(100,100,10,10);
+					ventana_espera_1.add(mensajito);
+					ventana_espera_1.setVisible(true);
 					
-					while(!contricante_listo);							
+					System.out.println("Contrincante espera");
+					while(contricante_listo != true){
+						Thread.sleep(1000);
+					}	
+					System.out.println("Contrincante listo");					
 					
-					//ventana_espera.setVisible(false);
-					//ventana_espera = null;
-					ventana_espera.dispose();
+					ventana_espera_1.setVisible(false);
+					ventana_espera_1.dispose();
 				}
 				catch(Exception io){
 					JOptionPane.showMessageDialog(ventana,"Error con la conexión, vuelva a iniciar partida");
