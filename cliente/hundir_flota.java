@@ -275,14 +275,16 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	
 	public void fin_partida(){
 		JOptionPane.showMessageDialog(ventana,"¡¡ENHORABUENA, HAS GANADO!!");
+		ventana.dispose();
 	}
 	
 	public void empieza_partida(hundir_flota_interface contrincante,boolean turn) throws RemoteException{
 		enemigo = contrincante;
 		turno = turn;
-		ventana_espera.removeAll();
-		ventana_espera.setVisible(false);
-		ventana_espera = null;
+		//ventana_espera.removeAll();
+		//ventana_espera.setVisible(false);
+		//ventana_espera = null;
+		ventana_espera.dispose();
 		iniciar_juego();
 	}
 	
@@ -608,26 +610,25 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				}
 				
 				try{
-					while(!contricante_listo){
-						//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
-						if(ventana_espera == null){
-							JFrame ventana_espera = new JFrame();
-							ventana_espera.setSize(100,100);
-							JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
-							mensajito.setBounds(100,100,100,100);
-							ventana_espera.add(mensajito);
-							ventana_espera.setVisible(true);
-						}
-						enemigo.listo();
-					}
+					enemigo.listo();
 					
-					ventana_espera.setVisible(false);
-					ventana_espera = null;
+					//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
+					JFrame ventana_espera = new JFrame();
+					ventana_espera.setSize(100,100);
+					JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
+					mensajito.setBounds(100,100,100,100);
+					ventana_espera.add(mensajito);
+					ventana_espera.setVisible(true);
+					
+					while(!contricante_listo);							
+					
+					//ventana_espera.setVisible(false);
+					//ventana_espera = null;
+					ventana_espera.dispose();
 				}
 				catch(Exception io){
-					JOptionPane.showMessageDialog(ventana,"Algún error a la hora de avisar al compi");
-					ventana_espera.setVisible(false);
-					ventana_espera = null;
+					JOptionPane.showMessageDialog(ventana,"Error con la conexión, vuelva a iniciar partida");
+					ventana.dispose();
 				};
 				
 				Mapa_enemigo();
