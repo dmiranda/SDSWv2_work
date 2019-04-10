@@ -35,14 +35,11 @@ class juegos extends JFrame implements ActionListener{
 		/*************************************************************/
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource() == b[0]){
-			//JOptionPane.showMessageDialog(this,"Espera al jugador");
 			try{
 				srv = (ServicioJuego) Naming.lookup("//" + servidor + ":" + puerto + "/Juegos");
-				System.out.println("Conectado");
+				boolean ok = srv.hello();		//Este método sirve para salvaguardar el hecho de que el servidor no se encuentre disponible, saltando a la excepción sin crear el objtedo de clase "hundir_flota"
 				user = new hundir_flota();
-				System.out.println("Creado");
 				srv.alta(user);
-				System.out.println("Alta");
 			}
 			
 			catch(Exception re)
@@ -50,16 +47,19 @@ class juegos extends JFrame implements ActionListener{
 				System.out.println(re.toString());
 				JOptionPane.showMessageDialog(this,"No se puede conectar con el servidor");
 			}
+			
 		}
 		
 		else
 		{
 			try{
-				srv.baja(user);
+				if (user != null) srv.baja(user);
 				System.exit(0);
 			}
 			
-			catch (Exception ra){}
+			catch (Exception ra){
+				System.out.println(ra.toString());
+			}
 		}
 	}
 	/************************************************************/
@@ -77,7 +77,7 @@ class juegos extends JFrame implements ActionListener{
 			new juegos(args[0],args[1]);
         }
         catch (Exception e) {
-            System.err.println("Excepcion en ClienteChat:");
+            System.err.println("Excepcion en JUEGOS:");
             e.printStackTrace();
         }
 

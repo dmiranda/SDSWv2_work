@@ -8,9 +8,10 @@ import java.rmi.server.*;
 public class hundir_flota extends UnicastRemoteObject implements hundir_flota_interface {
 		
 	//CONTRINCANTE
-	hundir_flota_interface enemigo = null;
+	Partida partida = null;
+	int ID = -1;
 	private boolean contricante_listo = false;
-	boolean turno = false;
+	boolean espera = false;
 	
 
 	//Variables globales
@@ -26,8 +27,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	private Label titulo1,titulo2;
 	private JButton c1,c2,c3,c4;
 	private JButton comenzar, salir, instrucciones;
-	private Frame ventana;
-	private Frame ventana_espera;
+	private Frame ventana,ventana_espera;
+	//private Frame ventana_espera;
 	private int barco_seleccionado=0;
 	
 	//Clases que gestionan los botones
@@ -150,27 +151,88 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	}
 	
 	//Permite clickar sobre el mapa del contrincante para iniciar la partida
+	/*	- Se encarga de activar los botones del mapa donde tendremos que clickar para lanzar misiles al contrincante
+	*/
 	public void Mapa_enemigo(){
 
 		//Recorremos el mapa y asignamos el método
 		for(int i=0;i<=N_botones-1;i++){
 			mi_partida[i].addActionListener(pmp);
 		}
+		
+		try{
+			if(!partida.getTurno(ID)){			
+				//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
+				muestra_ventana_turno();
+						
+				System.out.println("Esperando turno");
+			}
+		}
+		catch(Exception e){
+			System.out.println(e.toString());
+		}
+	}
+	
+	//Método auxiliar para abrir la ventana de espera de turno
+	private void muestra_ventana_turno(){
+		ventana_espera = new Frame("Turno del oponente");
+		ventana_espera.setSize(200,200);
+		JLabel mensajito = new JLabel("Espera tu turno");
+		mensajito.setBounds(100,100,50,50);
+		ventana_espera.add(mensajito);
+		ventana_espera.setVisible(true);
+	}
+	
+	//Método que elimina la pantalla de espera de la interfaz, y permite al jugador realizar un tiro
+	public void Turno() throws RemoteException {
+		ventana_espera.setVisible(false);
+		ventana_espera.dispose();
+		System.out.println("Turno mio");
 	}
 	
 	//Crea la ventana y llama al constructor de la interfaz grafica
 	public hundir_flota() throws RemoteException{
+		
 		ventana_espera = new Frame("Esperando a jugador");
-		ventana_espera.setSize(100,100);
+		ventana_espera.setSize(500,500);
+		
+		ventana_espera.addWindowListener(new WindowListener(){
+            public void windowOpened(WindowEvent e){}
+            public void windowActivated(WindowEvent e){}
+            public void windowDeactivated(WindowEvent e){}
+            public void windowIconified(WindowEvent e){}
+            public void windowDeiconified(WindowEvent e){}
+            public void windowClosed(WindowEvent e){}
+            public void windowClosing(WindowEvent e){
+                ventana_espera.dispose();
+				try{
+					if(partida != null)	partida.salida();
+				}
+				catch(Exception ex){
+					System.out.println(ex.toString());
+				}
+				if(ventana != null) ventana.dispose();
+            }
+        });
 
-		Label mensajito = new Label("Espere.....");
+		JLabel mensajito = new JLabel("Espere.....");
 		mensajito.setBounds(10,20,20,20);
 		ventana_espera.add(mensajito);
 		
 		ventana_espera.setVisible(true);
 	}
-			
 		
+	//Método que asigna la partida a la que pertenece este jugador
+	/*	- Es llamado desde la clase juegos, que recibe la partida desde el servidor
+	*/
+	public void asigna_partida(Partida miPartida) throws RemoteException{
+		partida = miPartida;
+	}
+	
+	//Método que se encarga de construir la interfaz de usuario
+	/*	- Se crea el frame y se activan todas las acciones
+		- Se llama al método showButton, que construye todos los botones de la interfaz gráfica
+	*/
 	public void iniciar_juego (){
 		
 		ventana = new Frame("Hundir la flota");
@@ -195,14 +257,26 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		ventana.setVisible(true);
 	}
 	
-	public boolean tiro (int casilla) throws RemoteException{
-		boolean tocado = false;
+	//Método para gestionar la acción tiro por parte del oponente
+	/*
+		- Este método es llamado desde el objeto partida
+		- Recibe la casilla a la se ha lanzado el tiro
+		- Comprueba si corresponde con alguno de los barcos
+		- Devuelve:
+			0 -> Agua
+			1 -> Tocado
+			2 -> Hundido
+			
+		- Comprueba si, tras el tiro, se han hundido todos los barcos. En caso afirmativo, llama al metodo fin_partida para indicar que se ha acabado la partida.
+	*/
+	public int tiro (int casilla) throws RemoteException{
+		int tocado = 0;
 		
 		for(int i=0;i<1;i++)
 		{
 			if(salvavidas[i]==casilla)
 			{
-				tocado = true;
+				tocado = 2;
 				salvavidas[i]=300;
 				barcos_destruidos[0]=true;
 			}
@@ -212,11 +286,13 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		{
 			if(buque[i]==casilla)
 			{
-				tocado = true;
+				tocado = 1;
 				buque[i]=300;
 				
-				if((buque[0]==300) && (buque[1]==300))
+				if((buque[0]==300) && (buque[1]==300)){
 					barcos_destruidos[1]=true;
+					tocado = 2;
+				}
 			}
 		}
 			
@@ -224,11 +300,13 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		{
 			if(acorazado[i]==casilla)
 			{
-				tocado = true;
+				tocado = 1;
 				acorazado[i]=300;
 				
-				if((acorazado[0]==300) && (acorazado[1]==300) && (acorazado[2]==300))
+				if((acorazado[0]==300) && (acorazado[1]==300) && (acorazado[2]==300)){
+					tocado = 2;
 					barcos_destruidos[2]=true;
+				}
 			}
 		}
 			
@@ -236,88 +314,110 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		{
 			if(portaviones[i]==casilla)
 			{
-				tocado = true;
+				tocado = 1;
 				portaviones[i]=300;
 				
-				if((portaviones[0]==300) && (portaviones[1]==300) && (portaviones[2]==300) && (portaviones[3]==300) && (portaviones[4]==300))
+				if((portaviones[0]==300) && (portaviones[1]==300) && (portaviones[2]==300) && (portaviones[3]==300) && (portaviones[4]==300)){
+					tocado = 2;
 					barcos_destruidos[3]=true;
+				}
 			}
 		}
 		
-		if(tocado == true)
+		if(tocado != 0)
 			mi_mapa[casilla].setIcon(ic_tocado);
 		else
 			mi_mapa[casilla].setIcon(ic_agua);
 		
 		if(barcos_destruidos[0] && barcos_destruidos[1] && barcos_destruidos[2] && barcos_destruidos[3]){
-			try{
-				enemigo.fin_partida();
-				JOptionPane.showMessageDialog(ventana,"Perdiste la partida :(");				
-			}
-			
-			catch (RemoteException fallo){
-				JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
-			}
-			
-			finally{
-				ventana.dispose();
-			}
-		
+
+			ventana_espera.setVisible(false);
+			ventana_espera.dispose();				
+			tocado = 4;
+			JOptionPane.showMessageDialog(ventana,"Perdiste la partida :(");				
+			ventana.dispose();
 		}
 		
-		turno = true;
 		return tocado;
 	}
 	
+	//Método que indica al jugador que su contrincante ya está listo
 	public void listo() throws RemoteException{
 		contricante_listo = true;
-		System.out.println("Enviada peticion de listo");
+		System.out.println("Contrincante listo");
+		if(espera){
+			ventana_espera.setVisible(false);
+			ventana_espera.dispose();
+			Mapa_enemigo();
+		}
 	}
 	
-	public void fin_partida(){
-		JOptionPane.showMessageDialog(ventana,"¡¡ENHORABUENA, HAS GANADO!!");
+	//Método que indica el fin de la partida por parte del oponente
+	/*	- El objeto partida, llama a este método, indicando al jugador que ha finalizado la partida, y por tanto, ha ganado
+	*/
+	public void fin_partida(int ID_win){
+		if(ID_win == ID) JOptionPane.showMessageDialog(ventana,"¡¡ENHORABUENA, HAS GANADO!!");
+		else JOptionPane.showMessageDialog(ventana,"¡¡LO SIENTO, HAS PERDIDO!!");
+		ventana.dispose();
 	}
 	
-	public void empieza_partida(hundir_flota_interface contrincante,boolean turn) throws RemoteException{
-		enemigo = contrincante;
-		turno = turn;
+	//Método que indica el comienzo de la partida
+	/*	- El objeto Partida llama a este método para indicar al jugador que ya hay un oponente
+		- Se llama al método iniciar_juego antes de salir
+	*/
+	public void empieza_partida(int id) throws RemoteException{
+		ID = id;
+		
+		ventana_espera.removeAll();
 		ventana_espera.setVisible(false);
+		ventana_espera = null;
+		
 		iniciar_juego();
 	}
 	
 	//Gestiona las pulsaciones sobre el mapa de la izquierda, es decir, el mapa del contrincante
+	/* 	- Al pulsar sobre el mapa, y se captura la casilla pulsada
+		- El objeto partida nos devuelve:
+			0 -> Dibujamos un icono de agua
+			1 -> Dibujamos un icono de tocado
+			2 -> Indicamos al usuario que se ha hundido uno de los barcos del oponente
+	*/
 	class PulsaMapaPartida implements ActionListener{
         public void actionPerformed(ActionEvent e){
             JButton boton_pulsado = (JButton)e.getSource();
-			if(turno){
-				for(int j=0; j<N_botones; j++){
-					if(mi_partida[j]==boton_pulsado){
-						mi_partida[j].removeActionListener(pmp);
-						System.out.println("Boton presionado: " + j);
-						try{
-							if(enemigo.tiro(j))
+			
+			for(int j=0; j<N_botones; j++){
+				if(mi_partida[j]==boton_pulsado){
+					mi_partida[j].removeActionListener(pmp);
+					System.out.println("Boton presionado: " + j);
+					
+					try{
+						if(partida.getTurno(ID)){
+							if(partida.tiro(ID,j) != 0)
 								mi_partida[j].setIcon(ic_tocado);
 							else
 								mi_partida[j].setIcon(ic_agua);
+						
+							muestra_ventana_turno();
 						}
-						catch(RemoteException fail){
-							JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
-							ventana.dispose();
-						}
-
-						finally{
-							turno = false;
-							break;
-						}
+						
+						else
+							JOptionPane.showMessageDialog(ventana,"Turno del contrincante");
+						
+					}
+					catch(RemoteException fail){
+						JOptionPane.showMessageDialog(ventana,"PERDIDA LA CONEXIÓN CON EL CONTRINCANTE");
+						ventana.dispose();
 					}
 				}
 			}
-			else
-				JOptionPane.showMessageDialog(ventana,"No es tu turno!");
 		}
     }
 	
 	//Gestiona todo el mapa de la derecha, donde el jugador tiene que colocar los barcos de su mapa
+	/* 	- Se obtiene el barco seleccionado de la lista, para saber qué barco se coloca a cada momento
+		- Se marca la posición seleccionada, y se comprueba en cada instante que es una posición válida. Esto quiere decir que sean dos celdas consecutivas en horizontal o vertical
+	*/
 	class PulsaMiMapa implements ActionListener{
         public void actionPerformed(ActionEvent e){
             JButton boton_pulsado = (JButton)e.getSource();
@@ -580,19 +680,28 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 			
 		}
     }
-		
+	
+	//Método que gestiona la salida del jugador de la partida, para evitar errores
 	class CerrarPartida implements ActionListener{
 		public void actionPerformed(ActionEvent e){
+			if(ventana_espera != null) ventana_espera.dispose();
+
 			ventana.dispose();
 		}
 	}
 	
+	//Método que gestiona la pantalla de Instrucciones si se pulsa el botón correspondiente
 	class Instrucciones implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			JOptionPane.showMessageDialog(ventana,"\tPrimero coloca tus barcos en el mapa de la derecha.\n\t\tTras ello, pulsa \"Comenzar partida\" e intenta encontrar los barcos de la CPU clicando en el mapa de la izquierda.\n\t\tIntenta acabar antes que tu contrincante. ¡¡Suerte!!");
 		}
 	}
 	
+	//Método que gestiona el pulsado de "Comenzar Partida"
+	/*	- Si el jugador no ha colocado sus barcos, se le advierte de que tiene que hacerlo
+		- Una vez pulsado el botón y colocados los barcos, se desactiva la opción de colocar los barcos de nuevo, ni modificarlos
+		- Se abre una ventana que indica que se ha de esperar a que el oponente coloque todos sus barcos
+	*/
 	class Fija_mapa implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			if((barcos_colocados[0]==true) && (barcos_colocados[1]==true) && (barcos_colocados[2]==true) && (barcos_colocados[3]==true)) //Si todos los barcos están colocados	
@@ -602,23 +711,36 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 					mi_mapa[i].removeActionListener(pmc);
 				}
 				
-				while(enemigo==null){
-				    JOptionPane.showMessageDialog(ventana,"Esperando a contrincante");
-				}
 				
 				try{
-					enemigo.listo();
-					while(!contricante_listo){
-						JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
-						enemigo.listo();
-						System.out.println("Contrincante =" + contricante_listo);
+					partida.listo(ID, salvavidas, buque, acorazado, portaviones);
+					
+					if(!contricante_listo){
+						//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
+						ventana_espera = new Frame("Esperando a contrincante");
+						ventana_espera.setSize(1000,1000);
+						JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
+						mensajito.setBounds(100,100,10,10);
+						ventana_espera.add(mensajito);
+						ventana_espera.setVisible(true);
+						
+						System.out.println("Contrincante espera");
+						
+						espera = true;
 					}
+					
+					else{
+						Mapa_enemigo();
+						System.out.println("Contrincante listo");					
+					}
+					
 				}
 				catch(Exception io){
-					JOptionPane.showMessageDialog(ventana,"Algún error a la hora de avisar al compi");
+					JOptionPane.showMessageDialog(ventana,"Error con la conexión, vuelva a iniciar partida");
+					ventana.dispose();
 				};
 				
-				Mapa_enemigo();
+				//Mapa_enemigo();
 			}			
 			else
 				JOptionPane.showMessageDialog(ventana,"¡TIENES QUE COLOCAR TODOS LOS BARCOS PARA COMENZAR!");
@@ -627,6 +749,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		}
 	}
 	
+	//Método que gestiona la seleccion del barco a colocar, de la lista que aparece a la derecha de la pantalla
 	class Coloca_barcos implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			if(e.getSource() == c1)
