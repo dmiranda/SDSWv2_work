@@ -265,7 +265,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		- Devuelve:
 			0 -> Agua
 			1 -> Tocado
-			2 -> Hundido
+			2 -> Tocado y Hundido
+			4 -> Tocado, Hundido y fin de partida
 			
 		- Comprueba si, tras el tiro, se han hundido todos los barcos. En caso afirmativo, llama al metodo fin_partida para indicar que se ha acabado la partida.
 	*/
@@ -333,9 +334,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 
 			ventana_espera.setVisible(false);
 			ventana_espera.dispose();				
-			tocado = 4;
-			JOptionPane.showMessageDialog(ventana,"Perdiste la partida :(");				
-			ventana.dispose();
+			tocado = 4;			
 		}
 		
 		return tocado;
@@ -355,9 +354,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	//Método que indica el fin de la partida por parte del oponente
 	/*	- El objeto partida, llama a este método, indicando al jugador que ha finalizado la partida, y por tanto, ha ganado
 	*/
-	public void fin_partida(int ID_win){
-		if(ID_win == ID) JOptionPane.showMessageDialog(ventana,"¡¡ENHORABUENA, HAS GANADO!!");
-		else JOptionPane.showMessageDialog(ventana,"¡¡LO SIENTO, HAS PERDIDO!!");
+	public void fin_partida(){
+		JOptionPane.showMessageDialog(ventana,"¡¡LO SIENTO, HAS PERDIDO!!");
 		ventana.dispose();
 	}
 	
@@ -393,12 +391,29 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 					
 					try{
 						if(partida.getTurno(ID)){
-							if(partida.tiro(ID,j) != 0)
+							int tocado = partida.tiro(ID,j);
+							if(tocado == 1)
 								mi_partida[j].setIcon(ic_tocado);
+							
+							else if(tocado == 2){
+								mi_partida[j].setIcon(ic_tocado);
+								JOptionPane.showMessageDialog(ventana,"!Tocado y hundido!");
+							}
+							
 							else
 								mi_partida[j].setIcon(ic_agua);
 						
-							muestra_ventana_turno();
+							//Mostramos ventana de espera de turno, Si y solo Si no se ha acabado la partida
+							if(tocado != 4){
+								//Antes de mostrarla, debemos comprobar que no es nuestro turno, para que no haya problemas con los turnos
+								if(!partida.getTurno(ID))
+									muestra_ventana_turno();
+							}
+							
+							else {
+								JOptionPane.showMessageDialog(ventana, "¡ENHORABUENA, HAS GANADO!");
+								ventana.dispose();
+							}
 						}
 						
 						else

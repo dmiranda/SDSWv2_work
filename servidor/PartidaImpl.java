@@ -77,13 +77,15 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 				log_partida.flush();
 				
 				if(resultado == 4)
-					fin_partida(ID_players[jugador_turno]);
+					fin_partida(ID_players[jugador_oponente]);
 				
-				//Indicamos que ahora el turno es del otro jugador
-				if(jugador_turno == 1) jugador_turno = 0;
-				else jugador_turno = 1;
+				else{
+					//Indicamos que ahora el turno es del otro jugador
+					if(jugador_turno == 1) jugador_turno = 0;
+					else jugador_turno = 1;
 				
-				jugadores[jugador_turno].Turno();
+					jugadores[jugador_turno].Turno();
+				}
 				
 				
 				return resultado;
@@ -148,9 +150,9 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		
 		//ESCRIBIR EN LA BDD EL RESULTADO FINAL
 		if((id == ID_players[0]) && (id == ID_players[1])){
-			jugadores[0].fin_partida(id);
-			jugadores[1].fin_partida(id);
-			ganador = id + 1;
+			jugadores[id].fin_partida();
+			if(id == ID_players[0]) ganador = 2;
+			else ganador = 1;
 		}
 		
 		else
