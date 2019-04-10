@@ -355,8 +355,36 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	/*	- El objeto partida, llama a este método, indicando al jugador que ha finalizado la partida, y por tanto, ha ganado
 	*/
 	public void fin_partida(){
-		JOptionPane.showMessageDialog(ventana,"¡¡LO SIENTO, HAS PERDIDO!!");
-		ventana.dispose();
+		if(ventana_espera != null) ventana_espera.dispose();
+		ventana_espera = new Frame("FIN partida");
+		ventana_espera.setSize(500,500);
+		
+		ventana_espera.addWindowListener(new WindowListener(){
+            public void windowOpened(WindowEvent e){}
+            public void windowActivated(WindowEvent e){}
+            public void windowDeactivated(WindowEvent e){}
+            public void windowIconified(WindowEvent e){}
+            public void windowDeiconified(WindowEvent e){}
+            public void windowClosed(WindowEvent e){}
+            public void windowClosing(WindowEvent e){
+                ventana_espera.dispose();
+				try{
+					if(partida != null)	partida.salida();
+				}
+				catch(Exception ex){
+					System.out.println(ex.toString());
+				}
+				if(ventana != null) ventana.dispose();
+            }
+        });
+
+		JLabel mensajito = new JLabel("¡¡LO SIENTO, HAS PERDIDO!!");
+		mensajito.setBounds(10,20,20,20);
+		ventana_espera.add(mensajito);
+		
+		ventana_espera.setVisible(true);
+		//JOptionPane.showMessageDialog(ventana,"¡¡LO SIENTO, HAS PERDIDO!!");
+		//ventana.dispose();
 	}
 	
 	//Método que indica el comienzo de la partida
