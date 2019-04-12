@@ -28,15 +28,11 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	private JButton c1,c2,c3,c4;
 	private JButton comenzar, salir, instrucciones;
 	private Frame ventana,ventana_espera;
-	//private Frame ventana_espera;
 	private int barco_seleccionado=0;
 	
 	//Clases que gestionan los botones
 	PulsaMapaPartida pmp = new PulsaMapaPartida();
 	PulsaMiMapa pmc = new PulsaMiMapa();
-	Fija_mapa fijar = new Fija_mapa();
-	CerrarPartida cp = new CerrarPartida();
-	Instrucciones ins = new Instrucciones();
 	Coloca_barcos colocar = new Coloca_barcos();
 	
 	//Posiciones de los barcos
@@ -133,19 +129,31 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		comenzar=new JButton("Comenzar partida");
 		comenzar.setBounds(500,y+100,200,50);
 		ventana.add(comenzar);
-		comenzar.addActionListener(fijar);
+		comenzar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Fija_mapa(evt);
+            }
+        });
 		
 		//Cerrar la ventana
 		salir=new JButton("Salir de la partida");
 		salir.setBounds(800,y+100,200,50);
 		ventana.add(salir);
-		salir.addActionListener(cp);
+		salir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Instrucciones(evt);
+            }
+        });
 		
 		//Leer las instrucciones para jugar
 		instrucciones=new JButton("Cómo jugar");
 		instrucciones.setBounds(100,y+100,150,50);
 		ventana.add(instrucciones);
-		instrucciones.addActionListener(ins);
+		instrucciones.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Instrucciones(evt);
+            }
+        });
 		
 
 	}
@@ -162,7 +170,6 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		
 		try{
 			if(!partida.getTurno(ID)){			
-				//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
 				muestra_ventana_turno();
 						
 				System.out.println("Esperando turno");
@@ -193,8 +200,9 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	//Crea la ventana y llama al constructor de la interfaz grafica
 	public hundir_flota() throws RemoteException{
 		
-		ventana_espera = new Frame("Esperando a jugador");
-		ventana_espera.setSize(500,500);
+		ventana_espera = new Frame("Espere....");
+		ventana_espera.setSize(300,100);
+		ventana_espera.setLocationRelativeTo(null);
 		
 		ventana_espera.addWindowListener(new WindowListener(){
             public void windowOpened(WindowEvent e){}
@@ -215,7 +223,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
             }
         });
 
-		JLabel mensajito = new JLabel("Espere.....");
+		JLabel mensajito = new JLabel("Esperando a oponente");
 		mensajito.setBounds(10,20,20,20);
 		ventana_espera.add(mensajito);
 		
@@ -357,7 +365,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	public void fin_partida(){
 		if(ventana_espera != null) ventana_espera.dispose();
 		ventana_espera = new Frame("FIN partida");
-		ventana_espera.setSize(500,500);
+		ventana_espera.setSize(200,200);
+		ventana_espera.setLocationRelativeTo(null);
 		
 		ventana_espera.addWindowListener(new WindowListener(){
             public void windowOpened(WindowEvent e){}
@@ -725,19 +734,16 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
     }
 	
 	//Método que gestiona la salida del jugador de la partida, para evitar errores
-	class CerrarPartida implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			if(ventana_espera != null) ventana_espera.dispose();
+	private void CerrarPartida(java.awt.event.ActionEvent evt) {
 
-			ventana.dispose();
-		}
+		if(ventana_espera != null) ventana_espera.dispose();
+
+		ventana.dispose();
 	}
 	
 	//Método que gestiona la pantalla de Instrucciones si se pulsa el botón correspondiente
-	class Instrucciones implements ActionListener{
-		public void actionPerformed(ActionEvent e){
+	private void Instrucciones(java.awt.event.ActionEvent evt) {
 			JOptionPane.showMessageDialog(ventana,"\tPrimero coloca tus barcos en el mapa de la derecha.\n\t\tTras ello, pulsa \"Comenzar partida\" e intenta encontrar los barcos de la CPU clicando en el mapa de la izquierda.\n\t\tIntenta acabar antes que tu contrincante. ¡¡Suerte!!");
-		}
 	}
 	
 	//Método que gestiona el pulsado de "Comenzar Partida"
@@ -745,51 +751,52 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		- Una vez pulsado el botón y colocados los barcos, se desactiva la opción de colocar los barcos de nuevo, ni modificarlos
 		- Se abre una ventana que indica que se ha de esperar a que el oponente coloque todos sus barcos
 	*/
-	class Fija_mapa implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			if((barcos_colocados[0]==true) && (barcos_colocados[1]==true) && (barcos_colocados[2]==true) && (barcos_colocados[3]==true)) //Si todos los barcos están colocados	
+	
+	private void Fija_mapa (java.awt.event.ActionEvent evt) {
+		if((barcos_colocados[0]==true) && (barcos_colocados[1]==true) && (barcos_colocados[2]==true) && (barcos_colocados[3]==true)) //Si todos los barcos están colocados	
+		{
+			for(int i=0;i<=N_botones-1;i++)	//Activamos todos las celdas del mapa de la partida, a la vez que desactivamos nuestro mapa
 			{
-				for(int i=0;i<=N_botones-1;i++)	//Activamos todos las celdas del mapa de la partida, a la vez que desactivamos nuestro mapa
-				{
-					mi_mapa[i].removeActionListener(pmc);
+				mi_mapa[i].removeActionListener(pmc);
+			}
+				
+				
+			try{
+				partida.listo(ID, salvavidas, buque, acorazado, portaviones);
+					
+				if(!contricante_listo){
+						
+					ventana_espera = new Frame("Esperando a contrincante");
+					ventana_espera.setSize(200,200);
+					ventana_espera.setLocationRelativeTo(null);
+					JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
+					mensajito.setBounds(100,100,10,10);
+					ventana_espera.add(mensajito);
+					ventana_espera.setVisible(true);
+						
+					System.out.println("Contrincante espera");
+						
+					espera = true;
+				}
+					
+				else{
+					Mapa_enemigo();
+					System.out.println("Contrincante listo");				
 				}
 				
-				
-				try{
-					partida.listo(ID, salvavidas, buque, acorazado, portaviones);
-					
-					if(!contricante_listo){
-						//JOptionPane.showMessageDialog(ventana,"Esperando a que el contrincante coloque sus barcos");
-						ventana_espera = new Frame("Esperando a contrincante");
-						ventana_espera.setSize(1000,1000);
-						JLabel mensajito = new JLabel("Esperando a que tu contrincante coloque sus barcos");
-						mensajito.setBounds(100,100,10,10);
-						ventana_espera.add(mensajito);
-						ventana_espera.setVisible(true);
-						
-						System.out.println("Contrincante espera");
-						
-						espera = true;
-					}
-					
-					else{
-						Mapa_enemigo();
-						System.out.println("Contrincante listo");					
-					}
-					
-				}
-				catch(Exception io){
-					JOptionPane.showMessageDialog(ventana,"Error con la conexión, vuelva a iniciar partida");
-					ventana.dispose();
-				};
-				
-				//Mapa_enemigo();
-			}			
-			else
-				JOptionPane.showMessageDialog(ventana,"¡TIENES QUE COLOCAR TODOS LOS BARCOS PARA COMENZAR!");
+			}
+			catch(Exception io){
+				JOptionPane.showMessageDialog(ventana,"Error con la conexión, vuelva a iniciar partida");
+				ventana.dispose();
+			};
+			
+			//Mapa_enemigo();
+		}			
+		else
+			JOptionPane.showMessageDialog(ventana,"¡TIENES QUE COLOCAR TODOS LOS BARCOS PARA COMENZAR!");
 				
 		
-		}
+		
 	}
 	
 	//Método que gestiona la seleccion del barco a colocar, de la lista que aparece a la derecha de la pantalla

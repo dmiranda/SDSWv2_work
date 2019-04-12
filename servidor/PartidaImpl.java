@@ -3,10 +3,18 @@ import java.rmi.*;
 import java.rmi.server.*;
 import java.io.*;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+
+
 class PartidaImpl extends UnicastRemoteObject implements Partida {
     hundir_flota_interface jugadores[] = {null , null};
 	int jugador_turno = 0;
-	int ID_players [] = {0,0};
+	String ID_players [] = new String [2];
 	
 	PrintWriter log_partida;
 	
@@ -15,12 +23,12 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		try{
 			//Configuramos el jugador 1
 			jugadores[0] = p1;
-			ID_players[0] = 14569;
+			ID_players[0] = "paco";
 			jugadores[0].empieza_partida(ID_players[0]);
 			
 			//Configuramos el jugador 2
 			jugadores[1] = p2; 
-			ID_players[1] = 562194;			
+			ID_players[1] = "pepe";			
 			jugadores[1].empieza_partida(ID_players[1]);
 
 			log_partida = new PrintWriter(new FileWriter("partida"+num));
@@ -92,7 +100,7 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 			}
 			catch(Exception re){
 				System.out.println(re.toString());
-				return 4;
+				return 10;
 			}
 		}
 		
@@ -148,7 +156,6 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 	public void fin_partida(int id) throws RemoteException {
 		int ganador = 100;
 		
-		//ESCRIBIR EN LA BDD EL RESULTADO FINAL
 		jugadores[id].fin_partida();
 		if(id == 0) ganador = 2;
 		else ganador = 1;
@@ -156,5 +163,27 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 	
 		log_partida.println("El ganador ha sido el jugador " + ganador);
 		log_partida.flush();
+		
+		//Guardamos el resultado en la base de datos
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/","salas","salas");
+			Statement stmt = con.createStatement();
+			
+			//Actualiza ganador
+			ResultSet rs = stmt.executeQuery("SELECT partidas,ganadas FROM tabla:partidas WHERE apodo=\'" + nombre + "\'");
+			
+			rs.next();
+			int [] partidas = {rs.getInt(1), rs.getInt(2)};
+				
+			if(!(rs.next())){					
+				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas[0] + 1 + ", ganadas = " + partidas[1] + 1 + " WHERE apodo = \'" + nombre + "\'" );
+			}
+				
+		} 
+		catch (Exception ex) {
+			System.out.println(ex.toString());
+		}
 	}
 }

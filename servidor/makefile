@@ -15,4 +15,4 @@ compile:
 
 # ########################################################
 execute:
-	java -Djava.security.policy=servidor.permisos -Djava.net.preferIPv4Stack=true -Djava.rmi.server.hostname=192.168.254.139 ServidorJuegos 54321
+	java -Djava.security.policy=servidor.permisos -Djava.net.preferIPv4Stack=true -Djava.rmi.server.hostname=192.168.254.139 -cp postgresql-42.2.5.jar:./ ServidorJuegos 54321

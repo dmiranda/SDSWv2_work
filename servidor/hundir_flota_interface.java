@@ -7,5 +7,5 @@ interface hundir_flota_interface extends Remote {
 	public void listo() throws RemoteException;	//Un jugador avisa al otro de que está a la espera
 	public void fin_partida() throws RemoteException;	//Un jugador avisa al otro de que ha destruido todos sus barcos
 	public void asigna_partida(Partida miPartida) throws RemoteException;	
-	public void Turno() throws RemoteException;
+	public void Turno() throws RemoteException;		//El objeto partida usa este método para darle el turno al jugador
 }

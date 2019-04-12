@@ -16,7 +16,7 @@ compile:
 # #########################################################
 
 execute:
-	java -Djava.security.policy=cliente.permisos -Djava.net.preferIPv4Stack=true juegos 192.168.254.139 54321
+	java -Djava.security.policy=cliente.permisos -Djava.net.preferIPv4Stack=true Pantalla_inicial 192.168.254.139 54321
 
 # #########################################################
 

@@ -1,6 +1,7 @@
 import java.rmi.*;
 import java.rmi.server.*;
 
+
 class ServidorJuegos  {
     static public void main (String args[]) {
        if (args.length!=1) {
@@ -19,7 +20,7 @@ class ServidorJuegos  {
             System.exit(1);
         }
         catch (Exception e) {
-            System.err.println("Excepcion en ServidorChat:");
+            System.err.println("Excepcion en ServidorJuegos:");
             e.printStackTrace();
             System.exit(1);
         }

@@ -1,5 +1,5 @@
 Paso 1:
-	El cliente se conecta al servidor y solicita una partida
+	El cliente se conecta al servidor y solicita una partida 
 	
 Paso 2:
 	El servidor comprueba que todos los objetos "partida" están completos
