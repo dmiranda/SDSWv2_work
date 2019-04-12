@@ -172,7 +172,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 			if(!partida.getTurno(nombre_user)){			
 				muestra_ventana_turno();
 						
-				System.out.println("Esperando turno");
+				//System.out.println("Esperando turno");
 			}
 		}
 		catch(Exception e){
@@ -194,7 +194,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	public void Turno() throws RemoteException {
 		ventana_espera.setVisible(false);
 		ventana_espera.dispose();
-		System.out.println("Turno mio");
+		//System.out.println("Turno mio");
 	}
 	
 	//Crea la ventana y llama al constructor de la interfaz grafica
@@ -353,7 +353,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	//Método que indica al jugador que su contrincante ya está listo
 	public void listo() throws RemoteException{
 		contricante_listo = true;
-		System.out.println("Contrincante listo");
+		//System.out.println("Contrincante listo");
 		if(espera){
 			ventana_espera.setVisible(false);
 			ventana_espera.dispose();
@@ -424,11 +424,11 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 			
 			for(int j=0; j<N_botones; j++){
 				if(mi_partida[j]==boton_pulsado){
-					mi_partida[j].removeActionListener(pmp);
-					System.out.println("Boton presionado: " + j);
+					//System.out.println("Boton presionado: " + j);
 					
 					try{
 						if(partida.getTurno(nombre_user)){
+							mi_partida[j].removeActionListener(pmp);
 							int tocado = partida.tiro(nombre_user,j);
 							if(tocado == 1)
 								mi_partida[j].setIcon(ic_tocado);
@@ -480,7 +480,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 			//En primer lugar, miramos qué boton se ha pulsado
 			for(int j=0; j<N_botones; j++){
 				if(mi_mapa[j]==boton_pulsado){
-					System.out.println("Boton presionado en la CPU: " + j);
+					//System.out.println("Boton presionado en la CPU: " + j);
 					casilla = j;
 				}
 			}
@@ -497,7 +497,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				salvavidas[0] = casilla;		//Almacenamos la casilla asignada
 				boton_pulsado.setIcon(ic_extremo);		//La marcamos con el icono correspondiente
 				barcos_colocados[barco_seleccionado-1]=true; //Marcamos el salvavidas como colocado
-				System.out.println("Salvavidas en " + salvavidas[0]);	
+				//System.out.println("Salvavidas en " + salvavidas[0]);	
 			}
 			
 			else if(barco_seleccionado == 2)	//Si el barco a colocar es el buque (2 casillas)
@@ -551,7 +551,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				}
 					
 				
-				System.out.println("Buque en {" + buque[0] +"," + buque[1] + "}");
+				//System.out.println("Buque en {" + buque[0] +"," + buque[1] + "}");
 			}
 			
 			
@@ -623,7 +623,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				}
 					
 				
-				System.out.println("Acorazado en {" + acorazado[0] +"," + acorazado[1] +"," + acorazado[2] + "}");
+				//System.out.println("Acorazado en {" + acorazado[0] +"," + acorazado[1] +"," + acorazado[2] + "}");
 			}
 			
 			else if(barco_seleccionado == 4)	//Si el barco a colocar es el acorazado (3 casillas)
@@ -728,7 +728,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				}
 					
 				
-				System.out.println("Portaviones en {" + portaviones[0] +"," + portaviones[1] +"," + portaviones[2] +"," + portaviones[3] +"," + portaviones[4] + "}");
+				//System.out.println("Portaviones en {" + portaviones[0] +"," + portaviones[1] +"," + portaviones[2] +"," + portaviones[3] +"," + portaviones[4] + "}");
 			}
 			
 		}
@@ -756,7 +756,6 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		- Una vez pulsado el botón y colocados los barcos, se desactiva la opción de colocar los barcos de nuevo, ni modificarlos
 		- Se abre una ventana que indica que se ha de esperar a que el oponente coloque todos sus barcos
 	*/
-	
 	private void Fija_mapa (java.awt.event.ActionEvent evt) {
 		if((barcos_colocados[0]==true) && (barcos_colocados[1]==true) && (barcos_colocados[2]==true) && (barcos_colocados[3]==true)) //Si todos los barcos están colocados	
 		{
@@ -779,14 +778,14 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 					ventana_espera.add(mensajito);
 					ventana_espera.setVisible(true);
 						
-					System.out.println("Contrincante espera");
+					//System.out.println("Contrincante espera");
 						
 					espera = true;
 				}
 					
 				else{
 					Mapa_enemigo();
-					System.out.println("Contrincante listo");				
+					//System.out.println("Contrincante listo");				
 				}
 				
 			}

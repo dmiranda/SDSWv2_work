@@ -165,7 +165,7 @@ public class Pantalla_inicial extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>                        
+    }                       
 
 	private void iniciar_partida(java.awt.event.ActionEvent evt) {	
 		try{
