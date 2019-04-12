@@ -157,8 +157,11 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		String perdedor = "NONE";
 		
 		jugadores[id].fin_partida();
+		
 		if(id == 0) ganador = ID_players[1];
 		else ganador = ID_players[0];
+		
+		perdedor = ID_players[id];
 		
 	
 		log_partida.println("El ganador ha sido el jugador " + ganador);
