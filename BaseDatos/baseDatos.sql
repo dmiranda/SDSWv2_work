@@ -6,7 +6,8 @@ CREATE TABLE jugadores (
 CREATE TABLE tabla_partidas (
 	apodo CHAR(20) REFERENCES jugadores (apodo),
 	partidas INTEGER,
-	ganadas	INTEGER);
+	ganadas	INTEGER,
+	PRIMARY KEY (apodo));
 
 \copy jugadores FROM jugadores.txt
 \copy tabla_partidas FROM partidas.txt

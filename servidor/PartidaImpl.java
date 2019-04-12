@@ -49,7 +49,6 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 	
 	//Método encargado de eliminar la partida, pues un jugador decide salir de ella
 	public void salida() throws RemoteException {
-		System.out.println("El jugador se ha cansado de esperar");
 		jugadores[0] = null;
     }
 	
@@ -175,11 +174,12 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 			//Actualiza ganador
 			ResultSet rs_gan = stmt.executeQuery("SELECT partidas,ganadas FROM tabla_partidas WHERE apodo=\'" + ganador + "\'");
 			
-			rs_gan.next();
-			int [] partidas_gan = {rs_gan.getInt(1), rs_gan.getInt(2)};
+			if(rs_gan.next()){
+				int [] partidas_gan = {rs_gan.getInt(1) + 1, rs_gan.getInt(2) + 1};
+
 				
-			if((rs_gan.next())){					
-				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_gan[0] + 1 + ", ganadas = " + partidas_gan[1] + 1 + " WHERE apodo = \'" + ganador + "\'" );
+								
+				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_gan[0] + ", ganadas = " + partidas_gan[1] + " WHERE apodo = \'" + ganador + "\'" );
 			}
 			
 			else
@@ -188,11 +188,10 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 			//Actualiza perdedor
 			ResultSet rs_perd = stmt.executeQuery("SELECT partidas FROM tabla_partidas WHERE apodo=\'" + perdedor + "\'");
 			
-			rs_perd.next();
-			int partidas_perd = rs_perd.getInt(1);
-				
-			if((rs_perd.next())){					
-				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_perd + 1 + " WHERE apodo = \'" + perdedor + "\'" );
+			if(rs_perd.next()){
+				int partidas_perd = rs_perd.getInt(1) + 1;
+					
+				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_perd  + " WHERE apodo = \'" + perdedor + "\'" );
 			}
 			
 			else

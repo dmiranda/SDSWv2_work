@@ -183,11 +183,14 @@ public class Pantalla_inicial extends javax.swing.JFrame {
 	private void salir(java.awt.event.ActionEvent evt) {
 		try{
 			if (user != null) srv.baja(user);
-			System.exit(0);
 		}
 				
 		catch (Exception ra){
 				System.out.println(ra.toString());
+				
+		}
+		finally{
+			System.exit(0);
 		}
 	}
 	
