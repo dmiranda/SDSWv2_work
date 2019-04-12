@@ -182,15 +182,21 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_gan[0] + 1 + ", ganadas = " + partidas_gan[1] + 1 + " WHERE apodo = \'" + ganador + "\'" );
 			}
 			
+			else
+				stmt.executeUpdate("INSERT INTO tabla_partidas VALUES (\'" + ganador + "\'," + 1 + "," + 1 + ")");
+			
 			//Actualiza perdedor
 			ResultSet rs_perd = stmt.executeQuery("SELECT partidas FROM tabla_partidas WHERE apodo=\'" + perdedor + "\'");
 			
 			rs_perd.next();
 			int partidas_perd = rs_perd.getInt(1);
 				
-			if(!(rs_perd.next())){					
+			if((rs_perd.next())){					
 				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_perd + 1 + " WHERE apodo = \'" + perdedor + "\'" );
 			}
+			
+			else
+				stmt.executeUpdate("INSERT INTO tabla_partidas VALUES (\'" + perdedor + "\'," + 1 + "," + 0 + ")");
 				
 		} 
 		catch (Exception ex) {

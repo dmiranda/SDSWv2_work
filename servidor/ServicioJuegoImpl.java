@@ -17,10 +17,8 @@ class ServicioJuegoImpl extends UnicastRemoteObject implements ServicioJuego {
     }
 	
     public void alta(hundir_flota_interface c) throws RemoteException {
-		System.out.println("Nuevo jugador!");
 		if(jugador_espera==null){
 			jugador_espera = c;
-			System.out.println("\tJugador en espera!");
 		}
 		else{
 			try{
@@ -43,7 +41,6 @@ class ServicioJuegoImpl extends UnicastRemoteObject implements ServicioJuego {
 	
     public void baja(hundir_flota_interface c) throws RemoteException {
 		jugador_espera=null;
-		System.out.println("\tJugador salio");
     }
 	
 	public boolean hello () throws RemoteException {
