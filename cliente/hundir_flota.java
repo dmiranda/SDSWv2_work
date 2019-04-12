@@ -9,7 +9,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		
 	//CONTRINCANTE
 	Partida partida = null;
-	int ID = -1;
+	String nombre_user = "NONE";
 	private boolean contricante_listo = false;
 	boolean espera = false;
 	
@@ -169,7 +169,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		}
 		
 		try{
-			if(!partida.getTurno(ID)){			
+			if(!partida.getTurno(nombre_user)){			
 				muestra_ventana_turno();
 						
 				System.out.println("Esperando turno");
@@ -198,7 +198,9 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	}
 	
 	//Crea la ventana y llama al constructor de la interfaz grafica
-	public hundir_flota() throws RemoteException{
+	public hundir_flota(String user) throws RemoteException{
+		
+		nombre_user = user;
 		
 		ventana_espera = new Frame("Espere....");
 		ventana_espera.setSize(300,100);
@@ -400,8 +402,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 	/*	- El objeto Partida llama a este método para indicar al jugador que ya hay un oponente
 		- Se llama al método iniciar_juego antes de salir
 	*/
-	public void empieza_partida(int id) throws RemoteException{
-		ID = id;
+	public void empieza_partida() throws RemoteException{
 		
 		ventana_espera.removeAll();
 		ventana_espera.setVisible(false);
@@ -427,8 +428,8 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 					System.out.println("Boton presionado: " + j);
 					
 					try{
-						if(partida.getTurno(ID)){
-							int tocado = partida.tiro(ID,j);
+						if(partida.getTurno(nombre_user)){
+							int tocado = partida.tiro(nombre_user,j);
 							if(tocado == 1)
 								mi_partida[j].setIcon(ic_tocado);
 							
@@ -443,7 +444,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 							//Mostramos ventana de espera de turno, Si y solo Si no se ha acabado la partida
 							if(tocado != 4){
 								//Antes de mostrarla, debemos comprobar que no es nuestro turno, para que no haya problemas con los turnos
-								if(!partida.getTurno(ID))
+								if(!partida.getTurno(nombre_user))
 									muestra_ventana_turno();
 							}
 							
@@ -741,6 +742,10 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 		ventana.dispose();
 	}
 	
+	public String getNombre() throws RemoteException{
+		return nombre_user;
+	}
+	
 	//Método que gestiona la pantalla de Instrucciones si se pulsa el botón correspondiente
 	private void Instrucciones(java.awt.event.ActionEvent evt) {
 			JOptionPane.showMessageDialog(ventana,"\tPrimero coloca tus barcos en el mapa de la derecha.\n\t\tTras ello, pulsa \"Comenzar partida\" e intenta encontrar los barcos de la CPU clicando en el mapa de la izquierda.\n\t\tIntenta acabar antes que tu contrincante. ¡¡Suerte!!");
@@ -762,7 +767,7 @@ public class hundir_flota extends UnicastRemoteObject implements hundir_flota_in
 				
 				
 			try{
-				partida.listo(ID, salvavidas, buque, acorazado, portaviones);
+				partida.listo(nombre_user, salvavidas, buque, acorazado, portaviones);
 					
 				if(!contricante_listo){
 						

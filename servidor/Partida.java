@@ -2,9 +2,9 @@
 import java.rmi.*;
 
 interface Partida extends Remote {
-    int		tiro(int id, int casilla) throws RemoteException;
-	void 	listo(int id, int b1[], int b2[], int b3[], int b4[]) throws RemoteException;
+    int		tiro(String user, int casilla) throws RemoteException;
+	void 	listo(String user, int b1[], int b2[], int b3[], int b4[]) throws RemoteException;
 	void 	salida() throws RemoteException;
-	boolean	getTurno(int id) throws RemoteException;
+	boolean	getTurno(String user) throws RemoteException;
 	void	fin_partida(int id) throws RemoteException;
 }

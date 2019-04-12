@@ -103,7 +103,7 @@ public class Pantalla_inicial extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        nombre_user.setText(nombre);
+        nombre_user.setText("Bienvenido:" + nombre);
 
         Inicia_partida.setText("Iniciar partida");
 		Inicia_partida.addActionListener(new java.awt.event.ActionListener() {
@@ -169,7 +169,7 @@ public class Pantalla_inicial extends javax.swing.JFrame {
 
 	private void iniciar_partida(java.awt.event.ActionEvent evt) {	
 		try{
-				user = new hundir_flota();
+				user = new hundir_flota(nombre);
 				srv.alta(user);
 			}
 			

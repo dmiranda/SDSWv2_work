@@ -23,13 +23,13 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		try{
 			//Configuramos el jugador 1
 			jugadores[0] = p1;
-			ID_players[0] = "paco";
-			jugadores[0].empieza_partida(ID_players[0]);
+			ID_players[0] = p1.getNombre();
+			jugadores[0].empieza_partida();
 			
 			//Configuramos el jugador 2
 			jugadores[1] = p2; 
-			ID_players[1] = "pepe";			
-			jugadores[1].empieza_partida(ID_players[1]);
+			ID_players[1] = p2.getNombre();			
+			jugadores[1].empieza_partida();
 
 			log_partida = new PrintWriter(new FileWriter("partida"+num));
 		}
@@ -60,7 +60,7 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		- Lo almacena en el log
 		- Lo manda de vuelta al jugador que ha relizado el tiro
 	*/
-	public int	tiro(int id, int casilla) throws RemoteException{
+	public int	tiro(String user, int casilla) throws RemoteException{
 		String result;
 		int jugador_oponente;
 		
@@ -68,7 +68,7 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		if(jugador_turno == 1) jugador_oponente = 0;
 		else jugador_oponente = 1;
 		
-		if(id == ID_players[jugador_turno]){
+		if(user.equals(ID_players[jugador_turno])){
 			try{
 				int resultado = jugadores[jugador_oponente].tiro(casilla);
 				if(resultado == 0)
@@ -111,16 +111,16 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 	
 	//Método que gestiona el "fijar mapa" del jugador
 	// Este método, recibe la lista de las casillas donde se encuentran los barcos del jugador, y los almacena en un log
-	public void listo(int id, int b1[], int b2[], int b3[], int b4[]) throws RemoteException{
+	public void listo(String user, int b1[], int b2[], int b3[], int b4[]) throws RemoteException{
 		int jug;
 		
-		if(id == ID_players[0])
+		if(user.equals(ID_players[0]))
 		{
 			jugadores[1].listo();
 			jug = 1;
 		}
 		
-		else if (id == ID_players[1])
+		else if (user.equals(ID_players[1]))
 		{
 			jugadores[0].listo();
 			jug = 2;
@@ -139,9 +139,9 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 	}
 	
 	//Método que devuelve un true si el jugador que la solicita tiene el turno, o false en caso de que sea su contrincante
-	public boolean 	getTurno(int ID) throws RemoteException{
+	public boolean 	getTurno(String user) throws RemoteException{
 		
-		if(ID == ID_players[jugador_turno])
+		if(user.equals(ID_players[jugador_turno]))
 			return true;
 		
 		else
@@ -154,11 +154,12 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 		- Almacena la información en el log y en la base de datos
 	*/
 	public void fin_partida(int id) throws RemoteException {
-		int ganador = 100;
+		String ganador = "NONE";
+		String perdedor = "NONE";
 		
 		jugadores[id].fin_partida();
-		if(id == 0) ganador = 2;
-		else ganador = 1;
+		if(id == 0) ganador = ID_players[1];
+		else ganador = ID_players[0];
 		
 	
 		log_partida.println("El ganador ha sido el jugador " + ganador);
@@ -172,13 +173,23 @@ class PartidaImpl extends UnicastRemoteObject implements Partida {
 			Statement stmt = con.createStatement();
 			
 			//Actualiza ganador
-			ResultSet rs = stmt.executeQuery("SELECT partidas,ganadas FROM tabla:partidas WHERE apodo=\'" + nombre + "\'");
+			ResultSet rs_gan = stmt.executeQuery("SELECT partidas,ganadas FROM tabla_partidas WHERE apodo=\'" + ganador + "\'");
 			
-			rs.next();
-			int [] partidas = {rs.getInt(1), rs.getInt(2)};
+			rs_gan.next();
+			int [] partidas_gan = {rs_gan.getInt(1), rs_gan.getInt(2)};
 				
-			if(!(rs.next())){					
-				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas[0] + 1 + ", ganadas = " + partidas[1] + 1 + " WHERE apodo = \'" + nombre + "\'" );
+			if((rs_gan.next())){					
+				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_gan[0] + 1 + ", ganadas = " + partidas_gan[1] + 1 + " WHERE apodo = \'" + ganador + "\'" );
+			}
+			
+			//Actualiza perdedor
+			ResultSet rs_perd = stmt.executeQuery("SELECT partidas FROM tabla_partidas WHERE apodo=\'" + perdedor + "\'");
+			
+			rs_perd.next();
+			int partidas_perd = rs_perd.getInt(1);
+				
+			if(!(rs_perd.next())){					
+				stmt.executeUpdate("UPDATE tabla_partidas SET " + "partidas = " + partidas_perd + 1 + " WHERE apodo = \'" + perdedor + "\'" );
 			}
 				
 		} 
